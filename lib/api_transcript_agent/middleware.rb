@@ -45,10 +45,10 @@ module ApiTranscriptAgent
       Rails.logger.debug "Sending transaction data to #{uri}…"
 
       request_headers = env.select {|k,v| k.start_with? 'HTTP_'}
-        .collect {|key, val| [key.sub(/^HTTP_/, ''), val]}
+        .transform_keys {|key| key.sub(/^HTTP_/, '') }
 
-      request_headers << ['Content-Type', env['CONTENT_TYPE']]
-      request_headers << ['Content-Length', env['CONTENT_LENGTH']]
+      request_headers['Content-Type'] = env['CONTENT_TYPE']
+      request_headers['Content-Length'] = env['CONTENT_LENGTH']
 
       request_info = {
         body: env['RAW_POST_DATA'],
