@@ -52,7 +52,7 @@ module ApiTranscriptAgent
 
       request_info = {
         body: env['RAW_POST_DATA'],
-        headers: request_headers.sort,
+        headers: request_headers,
         method: env['REQUEST_METHOD'],
         host: env['HTTP_HOST'],
         path: env['ORIGINAL_FULLPATH'],
