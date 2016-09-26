@@ -7,8 +7,11 @@ module ApiTranscriptAgent
 
     module ClassMethods
       def transcribe(*actions)
-        before_action only: actions do
-          env['api_transcript.transcribe_action'] = true
+        options = {}
+        options[:only] = actions if actions.present?
+
+        before_action(options) do
+          request.env['api_transcript.transcribe_action'] = true
         end
       end
     end
