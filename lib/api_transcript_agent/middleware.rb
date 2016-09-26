@@ -45,7 +45,7 @@ module ApiTranscriptAgent
       Rails.logger.debug "Sending transaction data to #{uri}…"
 
       request_headers = env.select {|k,v| k.start_with? 'HTTP_'}
-        .transform_keys {|key| key.sub(/^HTTP_/, '') }
+        .transform_keys {|key| key.sub(/^HTTP_/, '').capitalize }
 
       request_headers['Content-Type'] = env['CONTENT_TYPE']
       request_headers['Content-Length'] = env['CONTENT_LENGTH']

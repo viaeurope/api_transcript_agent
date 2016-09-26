@@ -10,7 +10,7 @@ module ApiTranscriptAgent
         options = {}
         options[:only] = actions if actions.present?
 
-        before_action(options) do
+        prepend_before_action(options) do
           request.env['api_transcript.transcribe_action'] = true
         end
       end
