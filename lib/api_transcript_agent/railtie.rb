@@ -4,7 +4,7 @@ module ApiTranscriptAgent
       app.middleware.insert_after Rails::Rack::Logger, ApiTranscriptAgent::Middleware
     end
 
-    initializer "draper.setup_action_controller" do |app|
+    initializer "api_transcript_agent.setup_action_controller" do |app|
       ActiveSupport.on_load :action_controller do
         include ApiTranscriptAgent::Transcribe
       end
