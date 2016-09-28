@@ -12,6 +12,7 @@ module ApiTranscriptAgent
 
     module ClassMethods
       def transcribe(options = {})
+        before_action_options ||= {}
         before_action_options = {only: options[:only]} if options[:only].present?
 
         prepend_before_action(before_action_options) do
