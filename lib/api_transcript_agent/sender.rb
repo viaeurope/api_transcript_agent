@@ -64,10 +64,8 @@ module ApiTranscriptAgent
         additional_data: additional_data
       }
 
-      unless Rails.env.test?
-        post_request = Net::HTTP::Post.new(uri, {'Content-Type' =>'application/json'})
-        post_request.body = { transaction: @last_sent_transaction_data }.to_json
-      end
+      post_request = Net::HTTP::Post.new(uri, {'Content-Type' =>'application/json'})
+      post_request.body = { transaction: @last_sent_transaction_data }.to_json
 
       result = Net::HTTP.start(uri.hostname, uri.port) { |http| http.request(post_request) }
 
