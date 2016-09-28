@@ -2,8 +2,8 @@ require 'net/http'
 
 module ApiTranscriptAgent
   class Sender
-    
-    API_REFEREE_RECEIVE_URL = 'http://api-transcript.herokuapp.com/api/v1/transactions'
+
+    API_REFEREE_RECEIVE_URL = 'http://api-transcript.dev/api/v1/transactions'
 
     attr_accessor :last_sent_transaction_data if Rails.env.test?
 
@@ -15,7 +15,7 @@ module ApiTranscriptAgent
       return Time.now - start_time
     end
 
-    def send_data(env)
+    def send_data(env, response, headers, status)
       start_time = Time.now
 
       uri = URI(API_REFEREE_RECEIVE_URL)
@@ -42,14 +42,14 @@ module ApiTranscriptAgent
 
       response_body = ""
 
-      if @response.respond_to? :join
-        response_body = @response.join('')
+      if response.respond_to? :join
+        response_body = response.join('')
       end
 
       response_info = {
         body: response_body,
-        headers: @headers,
-        status: @status
+        headers: headers,
+        status: status
       }
 
       collection_time = delta_since(start_time)

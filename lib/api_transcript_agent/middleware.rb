@@ -12,7 +12,7 @@ module ApiTranscriptAgent
         if Rails.env.test?
           transmit(env)
         else
-          Thread.new { ransmit(env) }
+          Thread.new { transmit(env) }
         end
       end
 
@@ -23,7 +23,7 @@ module ApiTranscriptAgent
 
     def transmit(env)
       begin
-        ApiTranscriptAgent::Sender.instance.send_data(env)
+        ApiTranscriptAgent::Sender.instance.send_data(env, @response, @headers, @status)
       rescue => e
         Rails.logger.debug "Could not send transaction data: #{e}"
       end
