@@ -3,7 +3,12 @@ require 'net/http'
 module ApiTranscriptAgent
   class Sender
 
-    API_REFEREE_RECEIVE_URL = 'http://api-transcript.dev/api/v1/transactions'
+    API_REFEREE_RECEIVE_URL =
+      if Rails.env.development?
+        'http://api-transcript.dev/api/v1/transactions'
+      else
+        'http://api-transcript.herokuapp.com/api/v1/transactions'
+      end
 
     attr_accessor :last_sent_transaction_data if Rails.env.test?
 
