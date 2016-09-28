@@ -1,5 +1,5 @@
 class PostsController < ApplicationController
-  transcribe :show, :update
+  transcribe only: [:show, :update], additional_data: -> { {data: @data} }
 
   rescue_from ActiveRecord::RecordNotFound do
     head :not_found
@@ -10,6 +10,7 @@ class PostsController < ApplicationController
   end
 
   def show
+    @data = 'FOOBAR'
     render json: Post.find(params[:id])
   end
 

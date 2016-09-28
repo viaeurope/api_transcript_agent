@@ -20,4 +20,3 @@ if ActiveSupport::TestCase.respond_to?(:fixture_path=)
 end
 
 require 'webmock/minitest'
-WebMock.disable_net_connect!(allow_localhost: false)
