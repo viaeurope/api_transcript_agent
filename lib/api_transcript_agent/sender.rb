@@ -10,7 +10,7 @@ module ApiTranscriptAgent
         'http://api-transcript.herokuapp.com/api/v1/transactions'
       end
 
-    attr_accessor :last_sent_transaction_data if Rails.env.test?
+    attr_accessor :last_sent_transaction_data
 
     def self.instance
       @instance ||= new
