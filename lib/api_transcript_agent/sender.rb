@@ -4,7 +4,7 @@ module ApiTranscriptAgent
   class Sender
 
     API_REFEREE_RECEIVE_URL =
-      if Rails.env.development?
+      if Rails.env.development? || Rails.env.test?
         'http://api-transcript.dev/api/v1/transactions'
       else
         'http://api-transcript.herokuapp.com/api/v1/transactions'
