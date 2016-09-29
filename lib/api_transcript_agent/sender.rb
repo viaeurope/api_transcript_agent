@@ -34,7 +34,7 @@ module ApiTranscriptAgent
       request_headers['Content-Length'] = env['CONTENT_LENGTH']
 
       request_info = {
-        body: env['RAW_POST_DATA'],
+        body: env['RAW_POST_DATA'].force_encoding('UTF-8'),
         headers: request_headers,
         method: env['REQUEST_METHOD'],
         host: env['HTTP_HOST'],
