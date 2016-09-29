@@ -22,4 +22,12 @@ class MiddlewareTest < ActionDispatch::IntegrationTest
     transaction = ApiTranscriptAgent::Sender.instance.last_sent_transaction_data
     assert_equal(transaction[:additional_data], {data: 'FOOBAR'})
   end
+
+  def test_passes_response_body
+    post = Post.create!(author: 'Some guy', body: 'Some text')
+    get "/posts/#{post.id}"
+    transaction = ApiTranscriptAgent::Sender.instance.last_sent_transaction_data
+    response_json = JSON.parse(transaction[:response][:body])
+    assert_equal(["Some guy", "Some text"], response_json.values_at('author', 'body'))
+  end
 end
