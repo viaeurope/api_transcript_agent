@@ -34,7 +34,7 @@ module ApiTranscriptAgent
       request_headers['Content-Length'] = env['CONTENT_LENGTH']
 
       request_info = {
-        body: env['RAW_POST_DATA'].force_encoding('UTF-8'),
+        body: env['RAW_POST_DATA']&.force_encoding('UTF-8'),
         headers: request_headers,
         method: env['REQUEST_METHOD'],
         host: env['HTTP_HOST'],
@@ -45,11 +45,14 @@ module ApiTranscriptAgent
         handled_by: env['action_dispatch.request.path_parameters'],
       }
 
-      response_body = ""
-
-      if response.respond_to? :join
-        response_body = response.join('')
-      end
+      response_body =
+        if response&.respond_to?(:body)
+          response.body
+        elsif response&.respond_to? :join
+          response.join('')
+        else
+          ""
+        end
 
       response_info = {
         body: response_body,
