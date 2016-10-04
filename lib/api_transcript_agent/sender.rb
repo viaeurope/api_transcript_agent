@@ -63,7 +63,10 @@ module ApiTranscriptAgent
       collection_time = delta_since(start_time)
 
       controller = env['action_controller.instance']
-      additional_data = controller.instance_exec(&env['api_transcript.additional_data_proc'])
+
+      if (data_block = env['api_transcript.additional_data_proc']).present?
+        additional_data = controller.instance_exec(&data_block)
+      end
 
       @last_sent_transaction_data = {
         request: request_info,
