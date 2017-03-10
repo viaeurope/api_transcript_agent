@@ -1,12 +1,13 @@
 class PostsController < ApplicationController
-  transcribe only: [:show, :update], additional_data: -> { {data: @data} }
+  transcribe only: [:show, :create, :update], additional_data: -> { {data: @data} }
 
   rescue_from ActiveRecord::RecordNotFound do
     head :not_found
   end
 
   def create
-    render json: { result: :created }, status: :created
+    @post = Post.create(post_params)
+    head :created, location: post_url(@post)
   end
 
   def show
@@ -15,6 +16,21 @@ class PostsController < ApplicationController
   end
 
   def update
-    render json: { errors: { author: 'must be set' } }, status: :unprocessable_entity
+    @post = Post.find(params[:id])
+    if @post.update(post_params)
+      head :no_content, location: post_url(@post)
+    else
+      render json: { errors: @post.errors }, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    head :ok
+  end
+
+private
+
+  def post_params
+    params.require(:post).permit(:author, :body)
   end
 end

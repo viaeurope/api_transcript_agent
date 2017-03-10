@@ -13,7 +13,7 @@ class MiddlewareTest < ActionDispatch::IntegrationTest
   end
 
   def test_only_runs_on_transcribed_actions
-    post '/posts'
+    delete '/posts', as: :json
     assert_not_requested(@stub_post)
   end
 
@@ -34,11 +34,17 @@ class MiddlewareTest < ActionDispatch::IntegrationTest
 
   def test_passes_response_body_when_unprocessable
     post = Post.create!(author: 'Some guy', body: 'Some text')
-    put "/posts/#{post.id}"
+    put "/posts/#{post.id}", params: { post: { author: '' } }, as: :json
+    assert_equal(response.status, 422)
     transaction = ApiTranscriptAgent::Sender.instance.last_sent_transaction_data
     response_json = JSON.parse(transaction[:response][:body])
-    assert_equal("must be set", response_json['errors']['author'])
+    assert_match("can't be blank", response_json['errors']['author'].first)
     assert_requested(@stub_post)
   end
 
+  def test_passes_response_body_when_bad_request
+    post = Post.create!(author: 'Some guy', body: 'Some text')
+    post "/posts", params: { }, as: :json
+    assert_equal(response.code, 400)
+  end
 end
