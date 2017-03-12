@@ -1,7 +1,10 @@
+require 'thread'
 require 'net/http'
+require 'net/http/persistent'
 
 module ApiTranscriptAgent
   class Sender
+    include Singleton
 
     API_REFEREE_RECEIVE_URL =
       if Rails.env.development? || Rails.env.test?
@@ -12,15 +15,48 @@ module ApiTranscriptAgent
 
     attr_accessor :last_sent_transaction_data
 
-    def self.instance
-      @instance ||= new
+    def initialize
+      @queue = Queue.new
+      Thread.abort_on_exception = true if Rails.env.test?
+      @worker = Thread.new { work }
+      @http = Net::HTTP::Persistent.new(name: 'ApiTranscriptAgent')
+    end
+
+    def work
+      while args = @queue.pop
+        return if args == :shutdown
+        send_data(*args)
+      end
+    rescue => e
+      Rails.logger.error "ApiTranscriptAgent: Caught error while sending ApiTranscription\n" +
+                         "#{e.class.name}: #{e.message}\n#{e.backtrace.join("\n")}"
+      sleep 1
+      retry
+    end
+
+    def shutdown
+      @queue.push(:shutdown)
+      @worker.join if @worker.alive?
+      @http.shutdown
+    end
+
+    def submit(*args)
+      if @worker.alive?
+        if @queue.size >= 1000
+          Rails.logger.warn "ApiTranscriptAgent: Sending queue is full (>= 1000), backing off"
+          return
+        end
+        @queue.push(args)
+      else
+        Rails.logger.warn "ApiTranscriptAgent: Worker died, no transcriptions are being sent"
+      end
     end
 
     def delta_since(start_time)
       return Time.now - start_time
     end
 
-    def send_data(env, response, headers, status)
+    def send_data(env, status, headers, response)
       start_time = Time.now
 
       uri = URI(API_REFEREE_RECEIVE_URL)
@@ -75,17 +111,15 @@ module ApiTranscriptAgent
         additional_data: additional_data
       }
 
-      post_request = Net::HTTP::Post.new(uri, {'Content-Type' =>'application/json'})
+      post_request = Net::HTTP::Post.new(uri.path, {'Content-Type' =>'application/json'})
       post_request.body = { transaction: @last_sent_transaction_data }.to_json
 
-      result = Net::HTTP.start(uri.hostname, uri.port) { |http| http.request(post_request) }
+      result = @http.request(uri, post_request)
 
       transmission_time = delta_since(start_time)
 
       Rails.logger.debug "Sent transaction data (#{post_request.body.size} bytes) for request #{env['action_dispatch.request_id']} to api referee with status #{result.code}. Collection time: #{collection_time}, sending time: #{transmission_time}"
       Rails.logger.debug "-------------------\n\n"
-
-      return @last_sent_transaction_data
     end
   end
 end
