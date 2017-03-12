@@ -1,0 +1,17 @@
+## Customize dependencies
+dependencies:
+  override:
+    - bundle install: # note ':' here
+        timeout: 180 # fail if command has no output for 3 minutes
+        # IMPORTANT NOTE: ^^ the timeout modifier above must be
+        # double indented (four spaces) from the previous line
+
+## Customize database setup
+database:
+  override:
+    - rake
+
+## Customize test commands
+test:
+  override:
+    - rake test
