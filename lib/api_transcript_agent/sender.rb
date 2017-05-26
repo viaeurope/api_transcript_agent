@@ -6,12 +6,7 @@ module ApiTranscriptAgent
   class Sender
     include Singleton
 
-    API_REFEREE_RECEIVE_URL =
-      if Rails.env.development? || Rails.env.test?
-        'http://api-transcript.dev/api/v1/transactions'
-      else
-        'http://api-transcript.herokuapp.com/api/v1/transactions'
-      end
+    API_TRANSCRIPT_URL = ENV["API_TRANSCRIPT_URL"]
 
     attr_accessor :last_sent_transaction_data
 
@@ -59,7 +54,9 @@ module ApiTranscriptAgent
     def send_data(env, status, headers, response)
       start_time = Time.now
 
-      uri = URI(API_REFEREE_RECEIVE_URL)
+      return unless defined?(API_TRANSCRIPT_URL) && API_TRANSCRIPT_URL.present?
+
+      uri = URI(API_TRANSCRIPT_URL)
 
       Rails.logger.debug "Sending transaction data to #{uri}…"
 
